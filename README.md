@@ -2,9 +2,9 @@
 
 A multi-agent clinical nutrition system built with LangGraph. Eleven specialist agents collaborate through a non-linear graph with three feedback loops, conditional routing, parallel execution, and a dedicated safety resolution layer.
 
+<img width="2560" height="1208" alt="Screenshot (406)" src="https://github.com/user-attachments/assets/f5dac169-5a46-4d8d-8b7b-5aa480928f57" />
 
 
-<img width="2560" height="1600" alt="Screenshot (405)" src="https://github.com/user-attachments/assets/3b852386-e969-4d1f-951b-4bffd2e68219" />
 
 ---
 
