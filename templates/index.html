@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>NutriCoach AI v2</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=JetBrains+Mono:wght@400;500&family=Epilogue:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#07090a; --s1:#0d1115; --s2:#121820; --s3:#181f28;
+  --b1:#1c2630; --b2:#253343; --b3:#2d3f52;
+  --green:#22d3a0; --green-bg:rgba(34,211,160,.07);
+  --amber:#f5a623; --amber-bg:rgba(245,166,35,.07);
+  --red:#f05252;   --red-bg:rgba(240,82,82,.07);
+  --blue:#60a5fa;  --blue-bg:rgba(96,165,250,.07);
+  --violet:#a78bfa;--violet-bg:rgba(167,139,250,.07);
+  --text:#c5d8ea; --text2:#5e7d96; --text3:#344f63;
+  --cream:#eff0ec;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{background:var(--bg);color:var(--text);font-family:'Epilogue',sans-serif;font-size:13px;line-height:1.65;}
+
+/* grid layout — fixed height, no scroll on outer */
+.app{display:grid;grid-template-columns:280px 1fr;grid-template-rows:48px 1fr;height:100vh;overflow:hidden;}
+
+/* ── topbar ── */
+.topbar{grid-column:1/-1;background:rgba(7,9,10,.95);border-bottom:1px solid var(--b1);
+  display:flex;align-items:center;justify-content:space-between;padding:0 20px;z-index:100;}
+.brand{font-family:'Syne',sans-serif;font-size:15px;font-weight:800;color:var(--cream);
+  display:flex;align-items:center;gap:9px;letter-spacing:-.3px;}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 0 0 rgba(34,211,160,.6);animation:pulse 2s infinite;}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(34,211,160,.5);}70%{box-shadow:0 0 0 7px rgba(34,211,160,0);}100%{box-shadow:0 0 0 0 rgba(34,211,160,0);}}
+.v-tag{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);font-weight:400;}
+.chips{display:flex;gap:5px;}
+.chip{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  padding:3px 8px;border-radius:3px;border:1px solid;}
+.cg{color:var(--green);border-color:rgba(34,211,160,.3);background:var(--green-bg);}
+.ca{color:var(--amber);border-color:rgba(245,166,35,.3);background:var(--amber-bg);}
+.cb{color:var(--blue);border-color:rgba(96,165,250,.3);background:var(--blue-bg);}
+
+/* ── sidebar ── */
+.sidebar{background:var(--s1);border-right:1px solid var(--b1);
+  display:flex;flex-direction:column;overflow-y:auto;padding:16px 14px;gap:14px;}
+.sl{font-size:9px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--text3);margin-bottom:6px;}
+
+.apirow{background:var(--bg);border:1px solid var(--b2);border-radius:7px;
+  display:flex;align-items:center;gap:7px;padding:8px 10px;transition:border-color .15s;}
+.apirow:focus-within{border-color:var(--green);}
+.apirow i{color:var(--text3);font-size:12px;flex-shrink:0;}
+.apirow input{background:none;border:none;color:var(--text);font-family:'JetBrains Mono',monospace;
+  font-size:11px;width:100%;outline:none;}
+.apirow input::placeholder{color:var(--text3);}
+
+.fl{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--text3);margin-bottom:4px;display:block;}
+.fi{background:var(--bg);border:1px solid var(--b2);border-radius:6px;color:var(--text);
+  font-family:'Epilogue',sans-serif;font-size:12.5px;padding:7px 10px;width:100%;
+  transition:border-color .15s;appearance:none;outline:none;}
+.fi:focus{border-color:var(--green);}
+.fi option{background:var(--s1);}
+
+/* sex toggle */
+.seg{display:flex;gap:4px;}
+.sb{flex:1;background:var(--bg);border:1px solid var(--b2);border-radius:6px;
+  color:var(--text3);font-size:11px;font-weight:600;padding:6px 4px;text-align:center;
+  cursor:pointer;transition:all .15s;user-select:none;}
+.sb .ico{font-size:13px;display:block;margin-bottom:1px;}
+.sb.ag{border-color:var(--green);background:var(--green-bg);color:var(--green);}
+.sb.aa{border-color:var(--amber);background:var(--amber-bg);color:var(--amber);}
+.sb.ar{border-color:var(--red);background:var(--red-bg);color:var(--red);}
+.sb.av{border-color:var(--violet);background:var(--violet-bg);color:var(--violet);}
+
+hr.div{border:none;border-top:1px solid var(--b1);margin:0;}
+
+/* run button */
+.run{width:100%;background:var(--green);color:#040d09;border:none;border-radius:7px;
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:11px 14px;
+  cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;gap:7px;}
+.run:hover{filter:brightness(1.1);}
+.run:active{transform:scale(.98);}
+.run:disabled{opacity:.4;cursor:not-allowed;}
+
+/* loop status in sidebar */
+.loop-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;}
+.loop-tag{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  padding:2px 8px;border-radius:3px;}
+.lt-n{color:var(--blue);background:var(--blue-bg);border:1px solid rgba(96,165,250,.2);}
+.lt-m{color:var(--violet);background:var(--violet-bg);border:1px solid rgba(167,139,250,.2);}
+.lt-s{color:var(--amber);background:var(--amber-bg);border:1px solid rgba(245,166,35,.2);}
+.loop-val{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);}
+
+/* progress bar */
+.prog-track{height:2px;background:var(--b1);border-radius:99px;overflow:hidden;display:none;}
+.prog-track.show{display:block;}
+.prog-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--green),#7effd4);
+  border-radius:99px;transition:width .4s ease;}
+
+/* ── main pane ── */
+.main{display:grid;grid-template-rows:auto auto 32px auto 1fr;overflow:hidden;}
+
+/* ── graph section ── */
+.graph-wrap{background:var(--s1);border-bottom:1px solid var(--b1);padding:14px 20px 10px;}
+.graph-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.graph-hdr-title{font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);}
+.graph-status{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text3);}
+
+/* graph svg edges + nodes */
+.gedge{stroke-width:1.5;fill:none;transition:stroke .25s;}
+.gedge.idle{stroke:var(--b2);}
+.gedge.active{stroke:var(--green);stroke-dasharray:5 3;animation:dash .6s linear infinite;}
+.gedge.done{stroke:rgba(34,211,160,.3);}
+@keyframes dash{to{stroke-dashoffset:-8;}}
+.gnode rect{rx:5;transition:fill .25s,stroke .25s;}
+.gnode text{font-family:'JetBrains Mono',monospace;transition:fill .25s;}
+.gnode.idle rect{fill:var(--s2);stroke:var(--b2);}
+.gnode.idle text{fill:var(--text3);}
+.gnode.active rect{fill:var(--green-bg);stroke:var(--green);filter:drop-shadow(0 0 6px rgba(34,211,160,.25));}
+.gnode.active text{fill:var(--green);}
+.gnode.done rect{fill:rgba(34,211,160,.04);stroke:rgba(34,211,160,.3);}
+.gnode.done text{fill:rgba(34,211,160,.55);}
+.gnode.warn rect{fill:var(--amber-bg);stroke:var(--amber);}
+.gnode.warn text{fill:var(--amber);}
+.gnode.crit rect{fill:var(--blue-bg);stroke:var(--blue);}
+.gnode.crit text{fill:var(--blue);}
+
+/* ── BMI strip ── */
+.bmi-strip{display:none;background:var(--s1);border-bottom:1px solid var(--b1);padding:12px 20px;}
+.bmi-strip.show{display:flex;align-items:center;gap:24px;flex-wrap:wrap;}
+.bmi-num{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;line-height:1;letter-spacing:-2px;}
+.bmi-tag{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  padding:3px 9px;border-radius:3px;border:1px solid;margin-top:5px;display:inline-block;}
+.bt-n{color:var(--green);border-color:rgba(34,211,160,.3);background:var(--green-bg);}
+.bt-uw,.bt-ow{color:var(--amber);border-color:rgba(245,166,35,.3);background:var(--amber-bg);}
+.bt-ob{color:var(--red);border-color:rgba(240,82,82,.3);background:var(--red-bg);}
+.bmi-gauge{flex:1;min-width:200px;max-width:320px;}
+.gauge-track{height:5px;border-radius:99px;position:relative;margin:8px 0 5px;
+  background:linear-gradient(to right,var(--amber) 0%,var(--amber) 20%,var(--green) 20%,var(--green) 53%,var(--amber) 53%,var(--amber) 76%,var(--red) 76%,var(--red) 100%);}
+.gauge-thumb{position:absolute;top:50%;transform:translate(-50%,-50%);width:12px;height:12px;
+  border-radius:50%;background:var(--cream);border:2px solid var(--bg);
+  box-shadow:0 0 0 2px var(--green);transition:left .6s cubic-bezier(.34,1.56,.64,1);}
+.gauge-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--text3);}
+.bmi-meta{display:flex;gap:12px;}
+.meta-card{background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:8px 12px;}
+.mc-l{font-size:9px;color:var(--text3);font-weight:600;letter-spacing:.07em;text-transform:uppercase;margin-bottom:3px;}
+.mc-v{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--cream);line-height:1;}
+.mc-u{font-size:9px;color:var(--text3);margin-top:1px;}
+
+/* ── mini log strip ── */
+.log-strip{background:var(--bg);border-bottom:1px solid var(--b1);
+  display:flex;align-items:center;gap:8px;padding:0 16px;overflow:hidden;height:32px;}
+.log-strip .log-item{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;
+  font-size:10px;color:var(--text3);white-space:nowrap;opacity:0;animation:logpop .3s ease forwards;}
+@keyframes logpop{from{opacity:0;transform:translateX(-6px);}to{opacity:1;transform:none;}}
+.ltag{font-size:8px;font-weight:700;padding:1px 6px;border-radius:2px;text-transform:uppercase;}
+.lt-g{color:var(--green);background:var(--green-bg);}
+.lt-a{color:var(--amber);background:var(--amber-bg);}
+.lt-r{color:var(--red);background:var(--red-bg);}
+.lt-b{color:var(--blue);background:var(--blue-bg);}
+.lt-v{color:var(--violet);background:var(--violet-bg);}
+
+/* ── tabs ── */
+.tabs{display:none;border-bottom:1px solid var(--b1);padding:0 20px;overflow-x:auto;
+  background:var(--s1);flex-shrink:0;}
+.tabs.show{display:flex;}
+.tab{font-size:11px;font-weight:600;color:var(--text3);padding:10px 13px 8px;
+  border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;
+  transition:color .15s,border-color .15s;display:flex;align-items:center;gap:5px;}
+.tab:hover{color:var(--text2);}
+.tab.active{color:var(--green);border-bottom-color:var(--green);}
+.tab .d{width:5px;height:5px;border-radius:50%;background:var(--b2);flex-shrink:0;transition:background .2s;}
+.tab.done .d,.tab.active .d{background:var(--green);}
+.tab.loading .d{background:var(--amber);animation:bl .9s infinite;}
+.tab.warn .d{background:var(--red);}
+@keyframes bl{0%,100%{opacity:1;}50%{opacity:.2;}}
+
+/* ── panels ── */
+.panels{overflow-y:auto;flex:1;}
+.panel{display:none;padding:20px 24px;animation:fd .2s ease;}
+.panel.active{display:block;}
+@keyframes fd{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:none;}}
+
+/* panel header */
+.ph{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  padding-bottom:14px;border-bottom:1px solid var(--b1);margin-bottom:18px;}
+.ph-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:16px;flex-shrink:0;}
+.phi-g{background:var(--green-bg);color:var(--green);border:1px solid rgba(34,211,160,.2);}
+.phi-a{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(245,166,35,.2);}
+.phi-r{background:var(--red-bg);color:var(--red);border:1px solid rgba(240,82,82,.2);}
+.phi-b{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(96,165,250,.2);}
+.phi-v{background:var(--violet-bg);color:var(--violet);border:1px solid rgba(167,139,250,.2);}
+.ph-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--cream);line-height:1.2;}
+.ph-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.sbadge{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  padding:3px 10px;border-radius:3px;border:1px solid;white-space:nowrap;flex-shrink:0;}
+.sb-w{color:var(--text3);border-color:var(--b2);}
+.sb-r{color:var(--amber);border-color:rgba(245,166,35,.3);background:var(--amber-bg);}
+.sb-ok{color:var(--green);border-color:rgba(34,211,160,.3);background:var(--green-bg);}
+.sb-warn{color:var(--red);border-color:rgba(240,82,82,.3);background:var(--red-bg);}
+
+/* score row */
+.score-row{display:flex;align-items:center;gap:14px;padding:10px 14px;
+  background:var(--s2);border:1px solid var(--b1);border-radius:8px;margin-bottom:14px;}
+.sc-num{font-family:'Syne',sans-serif;font-size:24px;font-weight:800;line-height:1;}
+.sc-track{flex:1;height:4px;background:var(--b1);border-radius:99px;overflow:hidden;}
+.sc-fill{height:100%;border-radius:99px;transition:width .5s;}
+.sc-meta{font-size:10px;color:var(--text3);margin-top:3px;}
+
+/* content box */
+.cbox{background:var(--s2);border:1px solid var(--b1);border-radius:8px;padding:18px 20px;
+  font-size:13px;line-height:1.85;color:var(--text);white-space:pre-wrap;}
+.cbox.spin-state{display:flex;align-items:center;gap:10px;
+  color:var(--text3);font-size:11px;font-family:'JetBrains Mono',monospace;}
+
+/* proto badge */
+.proto{display:inline-flex;align-items:center;gap:6px;font-size:9px;font-weight:700;
+  letter-spacing:.07em;text-transform:uppercase;padding:4px 10px;border-radius:3px;
+  border:1px solid;margin-bottom:12px;}
+.ps{color:var(--green);border-color:rgba(34,211,160,.3);background:var(--green-bg);}
+.pi{color:var(--amber);border-color:rgba(245,166,35,.3);background:var(--amber-bg);}
+
+/* clearance banner */
+.cl-banner{display:flex;align-items:center;gap:8px;border-radius:7px;padding:10px 14px;margin-bottom:12px;font-size:12px;font-weight:600;}
+.cl-ok{background:var(--green-bg);border:1px solid rgba(34,211,160,.25);color:var(--green);}
+.cl-err{background:var(--red-bg);border:1px solid rgba(240,82,82,.25);color:var(--red);}
+
+/* resolver box */
+.resolver-section{margin-bottom:14px;}
+.resolver-label{font-size:9px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:6px;}
+.resolver-box{background:var(--s2);border:1px solid rgba(245,166,35,.2);border-radius:8px;
+  padding:14px 16px;font-size:12.5px;line-height:1.8;color:var(--text);white-space:pre-wrap;}
+
+/* coach card */
+.coach-card{background:linear-gradient(135deg,var(--s2),var(--s3));border:1px solid var(--b2);
+  border-radius:10px;padding:22px 24px;position:relative;overflow:hidden;}
+.coach-card::after{content:'';position:absolute;top:-20px;right:-20px;width:160px;height:160px;
+  background:radial-gradient(circle,rgba(34,211,160,.04),transparent 70%);pointer-events:none;}
+.coach-text{font-size:13px;line-height:1.9;color:var(--text);white-space:pre-wrap;}
+
+/* empty */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:60px 30px;text-align:center;gap:12px;height:100%;}
+.empty-ico{width:52px;height:52px;border:1px solid var(--b2);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--text3);background:var(--s1);}
+.empty h4{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text2);}
+.empty p{color:var(--text3);max-width:300px;font-size:12px;line-height:1.7;}
+.loop-pills{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-top:6px;}
+.lp{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  padding:3px 9px;border-radius:3px;}
+
+/* spinner */
+.sp{width:13px;height:13px;border:2px solid var(--b2);border-top-color:var(--green);
+  border-radius:50%;animation:r .65s linear infinite;flex-shrink:0;}
+@keyframes r{to{transform:rotate(360deg);}}
+
+/* toast */
+#toasts{position:fixed;bottom:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:6px;}
+.ter{background:var(--red-bg);border:1px solid rgba(240,82,82,.3);color:var(--red);
+  border-radius:7px;padding:10px 14px;font-size:12px;max-width:290px;animation:si .2s ease;}
+@keyframes si{from{opacity:0;transform:translateX(12px);}to{opacity:1;transform:none;}}
+
+::-webkit-scrollbar{width:3px;height:3px;}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px;}
+
+/* SVG marker helpers */
+#agent-svg{width:100%;overflow:visible;display:block;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══ topbar ══ -->
+<header class="topbar">
+  <div class="brand">
+    <div class="pulse"></div>
+    NutriCoach AI
+    <span class="v-tag">v2</span>
+  </div>
+  <div class="chips">
+    <span class="chip cg">11 Agents</span>
+    <span class="chip ca">3 Feedback Loops</span>
+    <span class="chip cb">LangGraph</span>
+  </div>
+</header>
+
+<!-- ══ sidebar ══ -->
+<aside class="sidebar">
+
+  <div>
+    <div class="sl">API Key</div>
+    <div class="apirow">
+      <i class="bi bi-key-fill"></i>
+      <input type="password" id="api-key" placeholder="sk-proj-..."/>
+    </div>
+  </div>
+
+  <hr class="div"/>
+
+  <div>
+    <div class="sl">Patient Profile</div>
+
+    <div class="mb-2">
+      <span class="fl">Sex</span>
+      <div class="seg">
+        <div class="sb ag" data-val="Male" onclick="pick(this,'gender','ag')"><span class="ico">♂</span>Male</div>
+        <div class="sb" data-val="Female" onclick="pick(this,'gender','av')"><span class="ico">♀</span>Female</div>
+      </div>
+    </div>
+
+    <div class="row g-2 mb-2">
+      <div class="col-4"><span class="fl">Age</span><input class="fi" type="number" id="age" value="32" min="10" max="100"/></div>
+      <div class="col-4"><span class="fl">kg</span><input class="fi" type="number" id="weight" value="88" step="0.5"/></div>
+      <div class="col-4"><span class="fl">cm</span><input class="fi" type="number" id="height" value="175"/></div>
+    </div>
+
+    <div class="mb-2">
+      <span class="fl">Activity</span>
+      <select class="fi" id="activity">
+        <option>Sedentary</option>
+        <option>Lightly Active</option>
+        <option selected>Moderately Active</option>
+        <option>Very Active</option>
+        <option>Extremely Active</option>
+      </select>
+    </div>
+
+    <div class="mb-2">
+      <span class="fl">Diet</span>
+      <select class="fi" id="dietary">
+        <option value="none">No restrictions</option>
+        <option value="vegetarian">Vegetarian</option>
+        <option value="vegan">Vegan</option>
+        <option value="gluten-free">Gluten-Free</option>
+        <option value="dairy-free">Dairy-Free</option>
+        <option value="halal">Halal</option>
+        <option value="kosher">Kosher</option>
+      </select>
+    </div>
+
+    <div class="mb-2">
+      <span class="fl">Health Conditions</span>
+      <select class="fi" id="conditions">
+        <option value="none">None</option>
+        <option value="type 2 diabetes">Type 2 Diabetes</option>
+        <option value="hypertension">Hypertension</option>
+        <option value="heart disease">Heart Disease</option>
+        <option value="kidney disease">Kidney Disease</option>
+        <option value="hypothyroidism">Hypothyroidism</option>
+        <option value="PCOS">PCOS</option>
+        <option value="high cholesterol">High Cholesterol</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <span class="fl">Goal</span>
+      <div class="seg">
+        <div class="sb ar" data-val="lose" onclick="pick(this,'goal','ar')"><span class="ico" style="font-size:11px;"><i class="bi bi-arrow-down-circle"></i></span>Lose</div>
+        <div class="sb" data-val="maintain" onclick="pick(this,'goal','ag')"><span class="ico" style="font-size:11px;"><i class="bi bi-circle"></i></span>Maintain</div>
+        <div class="sb" data-val="gain" onclick="pick(this,'goal','aa')"><span class="ico" style="font-size:11px;"><i class="bi bi-arrow-up-circle"></i></span>Gain</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="prog-track" id="prog"><div class="prog-fill" id="prog-fill"></div></div>
+
+  <button class="run" id="run-btn" onclick="run()">
+    <i class="bi bi-cpu-fill"></i> Generate Plan
+  </button>
+
+  <hr class="div"/>
+
+  <!-- Loop status -->
+  <div id="loop-section" style="display:none;">
+    <div class="sl">Feedback Loops</div>
+    <div class="loop-row">
+      <span class="loop-tag lt-n">↺ Nutrition</span>
+      <span class="loop-val" id="ls-n">—</span>
+    </div>
+    <div class="loop-row">
+      <span class="loop-tag lt-m">↺ Meal</span>
+      <span class="loop-val" id="ls-m">—</span>
+    </div>
+    <div class="loop-row">
+      <span class="loop-tag lt-s">⚑ Safety</span>
+      <span class="loop-val" id="ls-s">—</span>
+    </div>
+  </div>
+
+</aside>
+
+<!-- ══ main ══ -->
+<div class="main">
+
+  <!-- graph -->
+  <div class="graph-wrap">
+    <div class="graph-hdr">
+      <span class="graph-hdr-title">Live Execution Graph</span>
+      <span class="graph-status" id="g-status">idle</span>
+    </div>
+
+    <svg id="agent-svg" viewBox="0 0 980 190" height="155">
+      <defs>
+        <marker id="a0" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3z" fill="var(--b2)"/></marker>
+        <marker id="a1" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3z" fill="var(--green)"/></marker>
+        <marker id="a2" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L0,6 L6,3z" fill="rgba(34,211,160,.35)"/></marker>
+      </defs>
+
+      <!-- edges -->
+      <line class="gedge idle" id="e-sb" x1="72" y1="42" x2="115" y2="42" marker-end="url(#a0)"/>
+      <line class="gedge idle" id="e-br" x1="187" y1="42" x2="230" y2="42" marker-end="url(#a0)"/>
+      <path class="gedge idle" id="e-rs" d="M300 42 Q320 42 330 24 L365 24" fill="none" marker-end="url(#a0)"/>
+      <path class="gedge idle" id="e-ri" d="M300 42 Q320 42 330 60 L365 60" fill="none" marker-end="url(#a0)"/>
+      <path class="gedge idle" id="e-sn" d="M437 24 Q455 24 462 42 L470 42" fill="none" marker-end="url(#a0)"/>
+      <path class="gedge idle" id="e-in" d="M437 60 Q455 60 462 42 L470 42" fill="none" marker-end="url(#a0)"/>
+      <!-- loop 1 arc back -->
+      <path class="gedge idle" id="e-lp1" d="M540 32 Q540 8 490 8 Q440 8 400 8 Q365 8 365 24" fill="none" stroke-dasharray="4 3" marker-end="url(#a0)"/>
+      <line class="gedge idle" id="e-nc" x1="610" y1="42" x2="648" y2="42" marker-end="url(#a0)"/>
+      <path class="gedge idle" id="e-mp" d="M720 28 Q738 28 738 42 L738 60" fill="none" marker-end="url(#a0)"/>
+      <path class="gedge idle" id="e-sp" d="M720 56 Q738 56 738 60" fill="none" marker-end="url(#a0)"/>
+      <!-- loop 2 arc back -->
+      <path class="gedge idle" id="e-lp2" d="M728 115 Q728 135 690 135 Q660 135 660 75" fill="none" stroke-dasharray="4 3" marker-end="url(#a0)"/>
+      <line class="gedge idle" id="e-cg" x1="762" y1="90" x2="800" y2="90" marker-end="url(#a0)"/>
+      <!-- safety loop -->
+      <path class="gedge idle" id="e-gr" d="M840 112 Q840 135 868 135 Q895 135 895 155" fill="none" stroke-dasharray="4 3" marker-end="url(#a0)"/>
+      <path class="gedge idle" id="e-gc" d="M862 90 Q910 90 920 115" fill="none" marker-end="url(#a0)"/>
+      <path class="gedge idle" id="e-rc" d="M920 155 Q942 155 955 140" fill="none" marker-end="url(#a0)"/>
+
+      <!-- NODES -->
+      <!-- Supervisor -->
+      <g class="gnode idle" id="gn-supervisor">
+        <rect x="2" y="24" width="70" height="36" rx="5"/>
+        <text x="37" y="38" text-anchor="middle" font-size="8" font-weight="600">Supervisor</text>
+        <text x="37" y="51" text-anchor="middle" font-size="7" fill="inherit">orchestrate</text>
+      </g>
+      <!-- BMI -->
+      <g class="gnode idle" id="gn-bmi_analyst">
+        <rect x="115" y="24" width="72" height="36" rx="5"/>
+        <text x="151" y="38" text-anchor="middle" font-size="8" font-weight="600">BMI Analyst</text>
+        <text x="151" y="51" text-anchor="middle" font-size="7">assess</text>
+      </g>
+      <!-- Risk -->
+      <g class="gnode idle" id="gn-risk_classifier">
+        <rect x="230" y="24" width="70" height="36" rx="5"/>
+        <text x="265" y="38" text-anchor="middle" font-size="8" font-weight="600">Risk Classif.</text>
+        <text x="265" y="51" text-anchor="middle" font-size="7">route</text>
+      </g>
+      <!-- Standard Nutrition -->
+      <g class="gnode idle" id="gn-nutrition_planner_std">
+        <rect x="365" y="9" width="72" height="28" rx="5"/>
+        <text x="401" y="21" text-anchor="middle" font-size="7.5" font-weight="600">Standard</text>
+        <text x="401" y="32" text-anchor="middle" font-size="7">Nutrition</text>
+      </g>
+      <!-- Intervention Nutrition -->
+      <g class="gnode idle" id="gn-nutrition_planner_int">
+        <rect x="365" y="45" width="72" height="28" rx="5"/>
+        <text x="401" y="57" text-anchor="middle" font-size="7.5" font-weight="600">Intervention</text>
+        <text x="401" y="68" text-anchor="middle" font-size="7">Nutrition</text>
+      </g>
+      <!-- Nutrition Critic -->
+      <g class="gnode idle" id="gn-nutrition_critic">
+        <rect x="470" y="24" width="70" height="36" rx="5"/>
+        <text x="505" y="37" text-anchor="middle" font-size="8" font-weight="600">Nutr. Critic</text>
+        <text x="505" y="50" text-anchor="middle" font-size="7" id="nt-score">score —</text>
+      </g>
+      <text x="476" y="10" font-size="7" fill="var(--blue)" font-family="'JetBrains Mono',monospace">↺ Loop 1</text>
+
+      <!-- Meal -->
+      <g class="gnode idle" id="gn-meal_planner">
+        <rect x="648" y="14" width="72" height="26" rx="5"/>
+        <text x="684" y="25" text-anchor="middle" font-size="7.5" font-weight="600">Meal Planner</text>
+        <text x="684" y="36" text-anchor="middle" font-size="7">parallel</text>
+      </g>
+      <!-- Supplement -->
+      <g class="gnode idle" id="gn-supplement_advisor">
+        <rect x="648" y="45" width="72" height="26" rx="5"/>
+        <text x="684" y="56" text-anchor="middle" font-size="7.5" font-weight="600">Supplement</text>
+        <text x="684" y="67" text-anchor="middle" font-size="7">parallel</text>
+      </g>
+      <!-- Meal Critic -->
+      <g class="gnode idle" id="gn-meal_critic">
+        <rect x="720" y="62" width="42" height="56" rx="5"/>
+        <text x="741" y="82" text-anchor="middle" font-size="7.5" font-weight="600">Meal</text>
+        <text x="741" y="93" text-anchor="middle" font-size="7.5" font-weight="600">Critic</text>
+        <text x="741" y="106" text-anchor="middle" font-size="7" id="ml-score">—</text>
+      </g>
+      <text x="724" y="128" font-size="7" fill="var(--violet)" font-family="'JetBrains Mono',monospace">↺ Loop 2</text>
+
+      <!-- Risk Guard -->
+      <g class="gnode idle" id="gn-risk_guard">
+        <rect x="800" y="72" width="62" height="36" rx="5"/>
+        <text x="831" y="86" text-anchor="middle" font-size="8" font-weight="600">Risk Guard</text>
+        <text x="831" y="99" text-anchor="middle" font-size="7" id="g-txt">audit</text>
+      </g>
+      <!-- Safety Resolver -->
+      <g class="gnode idle" id="gn-safety_resolver">
+        <rect x="862" y="143" width="72" height="26" rx="5"/>
+        <text x="898" y="154" text-anchor="middle" font-size="7.5" font-weight="600">Safety</text>
+        <text x="898" y="165" text-anchor="middle" font-size="7">Resolver</text>
+      </g>
+      <text x="844" y="138" font-size="7" fill="var(--amber)" font-family="'JetBrains Mono',monospace">⚑ Loop 3</text>
+      <!-- Coach -->
+      <g class="gnode idle" id="gn-wellness_coach">
+        <rect x="935" y="115" width="42" height="36" rx="5"/>
+        <text x="956" y="129" text-anchor="middle" font-size="7.5" font-weight="600">Coach</text>
+        <text x="956" y="142" text-anchor="middle" font-size="7">final</text>
+      </g>
+    </svg>
+  </div>
+
+  <!-- BMI strip -->
+  <div class="bmi-strip" id="bmi-strip">
+    <div>
+      <div style="font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:3px;">BMI</div>
+      <div class="bmi-num" id="bmi-num" style="color:var(--green);">—</div>
+      <div class="bmi-tag bt-n" id="bmi-tag" style="display:none;"></div>
+    </div>
+    <div class="bmi-gauge">
+      <div class="gauge-track"><div class="gauge-thumb" id="g-thumb" style="left:0%;"></div></div>
+      <div class="gauge-labels">
+        <span>Under</span><span>Normal</span><span>Over</span><span>Obese</span>
+      </div>
+    </div>
+    <div class="bmi-meta" id="bmi-meta"></div>
+  </div>
+
+  <!-- mini log strip -->
+  <div class="log-strip" id="log-strip">
+    <span style="font-size:9px;color:var(--text3);font-family:'JetBrains Mono',monospace;flex-shrink:0;">LOG</span>
+    <div id="log-inner" style="display:flex;gap:10px;overflow:hidden;align-items:center;"></div>
+  </div>
+
+  <!-- tabs -->
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-tab="supervisor" onclick="sw('supervisor')"><div class="d"></div>Supervisor</div>
+    <div class="tab" data-tab="bmi" onclick="sw('bmi')"><div class="d"></div>BMI</div>
+    <div class="tab" data-tab="risk" onclick="sw('risk')"><div class="d"></div>Risk</div>
+    <div class="tab" data-tab="nutr" onclick="sw('nutr')"><div class="d"></div>Nutrition</div>
+    <div class="tab" data-tab="nutr-crit" onclick="sw('nutr-crit')"><div class="d"></div>Nutr. Critique</div>
+    <div class="tab" data-tab="meal" onclick="sw('meal')"><div class="d"></div>Meal Plan</div>
+    <div class="tab" data-tab="supp" onclick="sw('supp')"><div class="d"></div>Supplements</div>
+    <div class="tab" data-tab="meal-crit" onclick="sw('meal-crit')"><div class="d"></div>Meal Critique</div>
+    <div class="tab" data-tab="guard" onclick="sw('guard')"><div class="d"></div>Safety</div>
+    <div class="tab" data-tab="coach" onclick="sw('coach')"><div class="d"></div>Coach</div>
+  </div>
+
+  <!-- panels -->
+  <div class="panels" id="panels">
+
+    <!-- empty -->
+    <div class="empty" id="empty">
+      <div class="empty-ico"><i class="bi bi-diagram-3-fill"></i></div>
+      <h4>Multi-Agent Clinical System</h4>
+      <p>11 agents · 3 feedback loops · conditional routing · parallel execution</p>
+      <div class="loop-pills">
+        <span class="lp lt-n">↺ Nutrition Loop</span>
+        <span class="lp lt-m">↺ Meal Loop</span>
+        <span class="lp lt-s">⚑ Safety Loop</span>
+      </div>
+    </div>
+
+    <!-- supervisor -->
+    <div class="panel" id="panel-supervisor" style="display:none;">
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="ph-icon phi-g"><i class="bi bi-cpu-fill"></i></div>
+          <div><div class="ph-title">Supervisor</div><div class="ph-sub">Dispatches agents · computes TDEE · assigns protocol</div></div>
+        </div>
+        <div class="sbadge sb-w" id="badge-supervisor">Waiting</div>
+      </div>
+      <div class="cbox spin-state" id="content-supervisor"><div class="sp"></div>Waiting for Supervisor…</div>
+    </div>
+
+    <!-- bmi -->
+    <div class="panel" id="panel-bmi" style="display:none;">
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="ph-icon phi-a"><i class="bi bi-activity"></i></div>
+          <div><div class="ph-title">BMI Analysis</div><div class="ph-sub">Clinical body composition assessment</div></div>
+        </div>
+        <div class="sbadge sb-w" id="badge-bmi">Waiting</div>
+      </div>
+      <div id="bmi-metrics"></div>
+      <div class="cbox spin-state" id="content-bmi"><div class="sp"></div>Waiting…</div>
+    </div>
+
+    <!-- risk -->
+    <div class="panel" id="panel-risk" style="display:none;">
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="ph-icon phi-r"><i class="bi bi-shield-check"></i></div>
+          <div><div class="ph-title">Risk Classification</div><div class="ph-sub">Cardiovascular and metabolic risk stratification</div></div>
+        </div>
+        <div class="sbadge sb-w" id="badge-risk">Waiting</div>
+      </div>
+      <div class="cbox spin-state" id="content-risk"><div class="sp"></div>Waiting…</div>
+    </div>
+
+    <!-- nutr -->
+    <div class="panel" id="panel-nutr" style="display:none;">
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="ph-icon phi-g"><i class="bi bi-calculator-fill"></i></div>
+          <div><div class="ph-title">Nutrition Plan</div><div class="ph-sub">Precision calorie and macronutrient prescription</div></div>
+        </div>
+        <div class="sbadge sb-w" id="badge-nutr">Waiting</div>
+      </div>
+      <div id="nutr-proto"></div>
+      <div class="cbox spin-state" id="content-nutr"><div class="sp"></div>Waiting…</div>
+    </div>
+
+    <!-- nutr critique -->
+    <div class="panel" id="panel-nutr-crit" style="display:none;">
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="ph-icon phi-b"><i class="bi bi-chat-square-dots-fill"></i></div>
+          <div>
+            <div class="ph-title">Nutrition Critique <span class="loop-tag lt-n" style="font-size:8px;vertical-align:middle;">↺ Loop 1</span></div>
+            <div class="ph-sub">Scores plan 0–10 · triggers revision if score &lt; 7 · max 2 iterations</div>
+          </div>
+        </div>
+        <div class="sbadge sb-w" id="badge-nutr-crit">Waiting</div>
+      </div>
+      <div id="nutr-score-wrap"></div>
+      <div class="cbox spin-state" id="content-nutr-crit"><div class="sp"></div>Waiting…</div>
+    </div>
+
+    <!-- meal -->
+    <div class="panel" id="panel-meal" style="display:none;">
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="ph-icon phi-v"><i class="bi bi-calendar3-week-fill"></i></div>
+          <div><div class="ph-title">7-Day Meal Plan</div><div class="ph-sub">Daily meals with macronutrient breakdown per meal</div></div>
+        </div>
+        <div class="sbadge sb-w" id="badge-meal">Waiting</div>
+      </div>
+      <div class="cbox spin-state" id="content-meal"><div class="sp"></div>Waiting…</div>
+    </div>
+
+    <!-- supp -->
+    <div class="panel" id="panel-supp" style="display:none;">
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="ph-icon phi-a"><i class="bi bi-capsule-pill"></i></div>
+          <div><div class="ph-title">Supplement Protocol</div><div class="ph-sub">Evidence-based stack with dosage and timing</div></div>
+        </div>
+        <div class="sbadge sb-w" id="badge-supp">Waiting</div>
+      </div>
+      <div class="cbox spin-state" id="content-supp"><div class="sp"></div>Waiting…</div>
+    </div>
+
+    <!-- meal critique -->
+    <div class="panel" id="panel-meal-crit" style="display:none;">
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="ph-icon phi-b"><i class="bi bi-chat-square-dots"></i></div>
+          <div>
+            <div class="ph-title">Meal Critique <span class="loop-tag lt-m" style="font-size:8px;vertical-align:middle;">↺ Loop 2</span></div>
+            <div class="ph-sub">Scores meal plan 0–10 · triggers revision if score &lt; 7</div>
+          </div>
+        </div>
+        <div class="sbadge sb-w" id="badge-meal-crit">Waiting</div>
+      </div>
+      <div id="meal-score-wrap"></div>
+      <div class="cbox spin-state" id="content-meal-crit"><div class="sp"></div>Waiting…</div>
+    </div>
+
+    <!-- guard -->
+    <div class="panel" id="panel-guard" style="display:none;">
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="ph-icon phi-r"><i class="bi bi-shield-fill-check"></i></div>
+          <div>
+            <div class="ph-title">Safety Audit <span class="loop-tag lt-s" style="font-size:8px;vertical-align:middle;">⚑ Loop 3</span></div>
+            <div class="ph-sub">Clinical safety review · Safety Resolver activates on violations</div>
+          </div>
+        </div>
+        <div class="sbadge sb-w" id="badge-guard">Waiting</div>
+      </div>
+      <div id="clearance-wrap"></div>
+      <div id="resolver-section" style="display:none;" class="resolver-section">
+        <div class="resolver-label">Safety Resolver Output</div>
+        <div class="resolver-box" id="content-resolver"></div>
+      </div>
+      <div class="cbox spin-state" id="content-guard"><div class="sp"></div>Waiting…</div>
+    </div>
+
+    <!-- coach -->
+    <div class="panel" id="panel-coach" style="display:none;">
+      <div class="ph">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div class="ph-icon phi-v"><i class="bi bi-trophy-fill"></i></div>
+          <div><div class="ph-title">Wellness Coach Report</div><div class="ph-sub">Executive summary · action plan · 90-day milestones</div></div>
+        </div>
+        <div class="sbadge sb-w" id="badge-coach">Waiting</div>
+      </div>
+      <div class="cbox spin-state" id="content-coach"><div class="sp"></div>Waiting…</div>
+    </div>
+
+  </div><!-- /panels -->
+
+</div><!-- /main -->
+</div><!-- /app -->
+<div id="toasts"></div>
+
+<script>
+// ── state ─────────────────────────────────────────────────────────────────
+const S = { gender:'Male', goal:'lose' };
+let completed = 0;
+
+// ── toggles ───────────────────────────────────────────────────────────────
+function pick(el,key,cls){
+  el.closest('.seg').querySelectorAll('.sb').forEach(b=>b.classList.remove('ag','aa','ar','av'));
+  el.classList.add(cls); S[key]=el.dataset.val;
+}
+
+// ── tab switch ─────────────────────────────────────────────────────────────
+function sw(id){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelector(`.tab[data-tab="${id}"]`)?.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>{p.style.display='none';p.classList.remove('active');});
+  const p=document.getElementById('panel-'+id);
+  if(p){p.style.display='block';p.classList.add('active');}
+}
+
+// ── graph ─────────────────────────────────────────────────────────────────
+function gn(id,state){
+  const el=document.getElementById('gn-'+id);
+  if(el) el.className='gnode '+state;
+}
+function ge(id,state){
+  const el=document.getElementById('e-'+id);
+  if(!el)return;
+  el.className='gedge '+state;
+  const m = state==='active'?'url(#a1)':state==='done'?'url(#a2)':'url(#a0)';
+  el.setAttribute('marker-end',m);
+}
+
+// ── mini log (scrolling single line) ─────────────────────────────────────
+const logQueue=[];
+let logActive=false;
+function logLine(tag,cls,msg){
+  logQueue.push({tag,cls,msg});
+  if(!logActive) flushLog();
+}
+function flushLog(){
+  if(!logQueue.length){logActive=false;return;}
+  logActive=true;
+  const {tag,cls,msg}=logQueue.shift();
+  const inner=document.getElementById('log-inner');
+  // keep max 4 items visible
+  while(inner.children.length>=4) inner.removeChild(inner.firstChild);
+  const item=document.createElement('span');
+  item.className='log-item';
+  item.innerHTML=`<span class="ltag ${cls}">${tag}</span><span style="color:var(--text3);font-family:'JetBrains Mono',monospace;font-size:10px;">${msg}</span>`;
+  inner.appendChild(item);
+  setTimeout(flushLog,120);
+}
+
+// ── badge ─────────────────────────────────────────────────────────────────
+function badge(id,text,cls){
+  const b=document.getElementById('badge-'+id);
+  if(b){b.className='sbadge '+cls;b.textContent=text;}
+}
+function tabState(id,cls){
+  const t=document.querySelector(`.tab[data-tab="${id}"]`);
+  if(t){t.classList.remove('loading','done','warn');if(cls)t.classList.add(cls);}
+}
+
+// ── score bar ─────────────────────────────────────────────────────────────
+function scoreBar(wrapId,score,revs){
+  const col=score>=8?'var(--green)':score>=6?'var(--amber)':'var(--red)';
+  document.getElementById(wrapId).innerHTML=`
+    <div class="score-row">
+      <div><div class="sc-num" style="color:${col}">${score}<span style="font-size:12px;color:var(--text3);">/10</span></div>
+           <div class="sc-meta">${revs} revision(s)</div></div>
+      <div style="flex:1;">
+        <div class="sc-track"><div class="sc-fill" style="width:${score*10}%;background:${col};"></div></div>
+        <div class="sc-meta" style="margin-top:3px;">${score>=7?'Passed — proceeding':'Below threshold — revision triggered'}</div>
+      </div>
+    </div>`;
+}
+
+// ── set content ───────────────────────────────────────────────────────────
+function setContent(id,text){
+  const el=document.getElementById('content-'+id);
+  if(!el)return;
+  el.className='cbox';
+  el.textContent=text;
+}
+
+// ── BMI ───────────────────────────────────────────────────────────────────
+function showBmi(bmi,cat,tdee){
+  const strip=document.getElementById('bmi-strip');
+  strip.classList.add('show');
+  document.getElementById('bmi-num').textContent=bmi;
+  const catCls={'Normal weight':'bt-n','Underweight':'bt-uw','Overweight':'bt-ow','Obese':'bt-ob'};
+  const tag=document.getElementById('bmi-tag');
+  tag.textContent=cat; tag.style.display='inline-block';
+  tag.className='bmi-tag '+(catCls[cat]||'bt-n');
+  const cols={'Normal weight':'var(--green)','Underweight':'var(--amber)','Overweight':'var(--amber)','Obese':'var(--red)'};
+  document.getElementById('bmi-num').style.color=cols[cat]||'var(--green)';
+  const pct=Math.min(100,Math.max(0,((bmi-14)/26)*100));
+  document.getElementById('g-thumb').style.left=pct+'%';
+  if(tdee){
+    const w=parseFloat(document.getElementById('weight').value);
+    const h=parseFloat(document.getElementById('height').value)/100;
+    const lo=Math.round(18.5*h*h*10)/10,hi=Math.round(24.9*h*h*10)/10;
+    const delta=Math.round(Math.abs(w-(bmi>25?hi:lo))*10)/10;
+    document.getElementById('bmi-meta').innerHTML=`
+      <div class="meta-card"><div class="mc-l">TDEE</div><div class="mc-v">${tdee.toLocaleString()}</div><div class="mc-u">kcal/day</div></div>
+      <div class="meta-card"><div class="mc-l">Target</div><div class="mc-v">${lo}–${hi}</div><div class="mc-u">kg</div></div>
+      <div class="meta-card"><div class="mc-l">Delta</div><div class="mc-v">${delta}</div><div class="mc-u">kg to range</div></div>`;
+    document.getElementById('bmi-metrics').innerHTML=``;
+  }
+}
+
+// ── tick progress ─────────────────────────────────────────────────────────
+function tick(){
+  completed++;
+  document.getElementById('prog-fill').style.width=Math.round((completed/11)*100)+'%';
+}
+
+// ── toast ─────────────────────────────────────────────────────────────────
+function toast(msg){
+  const el=document.createElement('div');el.className='ter';
+  el.innerHTML='<i class="bi bi-exclamation-triangle me-2"></i>'+msg;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(),5000);
+}
+
+// ── reset ─────────────────────────────────────────────────────────────────
+function reset(){
+  completed=0;
+  document.getElementById('prog').classList.add('show');
+  document.getElementById('prog-fill').style.width='0%';
+  document.getElementById('empty').style.display='none';
+  document.getElementById('tabs').classList.add('show');
+  document.getElementById('bmi-strip').classList.remove('show');
+  document.getElementById('loop-section').style.display='block';
+  document.getElementById('g-status').textContent='running';
+  document.getElementById('log-inner').innerHTML='';
+  document.getElementById('nutr-proto').innerHTML='';
+  document.getElementById('nutr-score-wrap').innerHTML='';
+  document.getElementById('meal-score-wrap').innerHTML='';
+  document.getElementById('clearance-wrap').innerHTML='';
+  document.getElementById('resolver-section').style.display='none';
+  document.getElementById('content-resolver').textContent='';
+  document.getElementById('bmi-meta').innerHTML='';
+  ['ls-n','ls-m','ls-s'].forEach(id=>document.getElementById(id).textContent='—');
+  document.getElementById('nt-score').textContent='score —';
+  document.getElementById('ml-score').textContent='—';
+  document.getElementById('g-txt').textContent='audit';
+
+  // reset graph
+  ['supervisor','bmi_analyst','risk_classifier','nutrition_planner_std',
+   'nutrition_planner_int','nutrition_critic','meal_planner','supplement_advisor',
+   'meal_critic','risk_guard','safety_resolver','wellness_coach'].forEach(n=>gn(n,'idle'));
+  ['sb','br','rs','ri','sn','in','lp1','nc','mp','sp','lp2','cg','gr','gc','rc'].forEach(e=>ge(e,'idle'));
+
+  // reset panels + tabs
+  ['supervisor','bmi','risk','nutr','nutr-crit','meal','supp','meal-crit','guard','coach'].forEach(id=>{
+    tabState(id,''); badge(id,'Waiting','sb-w');
+    const c=document.getElementById('content-'+id);
+    if(c){c.className='cbox spin-state';c.innerHTML='<div class="sp"></div>Waiting…';}
+    const p=document.getElementById('panel-'+id);
+    if(p){p.style.display='none';p.classList.remove('active');}
+  });
+  // show supervisor panel active
+  const ps=document.getElementById('panel-supervisor');
+  if(ps){ps.style.display='block';ps.classList.add('active');}
+  sw('supervisor');
+}
+
+function resetBtn(){
+  const b=document.getElementById('run-btn');
+  b.disabled=false;b.innerHTML='<i class="bi bi-cpu-fill"></i> Generate Plan';
+}
+
+// ── event handler ─────────────────────────────────────────────────────────
+const AM={
+  'Supervisor':                   {tab:'supervisor', gn:'supervisor',            ge_a:null,  ge_d:'sb',  lt:'lt-g'},
+  'BMI Analyst':                  {tab:'bmi',        gn:'bmi_analyst',           ge_a:'sb',  ge_d:'br',  lt:'lt-a'},
+  'Risk Classifier':              {tab:'risk',       gn:'risk_classifier',       ge_a:'br',  ge_d:null,  lt:'lt-r'},
+  'Standard Nutrition Planner':   {tab:'nutr',       gn:'nutrition_planner_std', ge_a:null,  ge_d:'sn',  lt:'lt-g'},
+  'Intervention Nutrition Planner':{tab:'nutr',      gn:'nutrition_planner_int', ge_a:null,  ge_d:'in',  lt:'lt-a'},
+  'Nutrition Critic':             {tab:'nutr-crit',  gn:'nutrition_critic',      ge_a:null,  ge_d:'nc',  lt:'lt-b'},
+  'Meal Planner':                 {tab:'meal',       gn:'meal_planner',          ge_a:'nc',  ge_d:'mp',  lt:'lt-v'},
+  'Supplement Advisor':           {tab:'supp',       gn:'supplement_advisor',    ge_a:'nc',  ge_d:'sp',  lt:'lt-a'},
+  'Meal Critic':                  {tab:'meal-crit',  gn:'meal_critic',           ge_a:null,  ge_d:'cg',  lt:'lt-b'},
+  'Risk Guard':                   {tab:'guard',      gn:'risk_guard',            ge_a:'cg',  ge_d:null,  lt:'lt-r'},
+  'Safety Resolver':              {tab:'guard',      gn:'safety_resolver',       ge_a:'gr',  ge_d:'rc',  lt:'lt-a'},
+  'Wellness Coach':               {tab:'coach',      gn:'wellness_coach',        ge_a:'gc',  ge_d:null,  lt:'lt-v'},
+};
+
+function handleEvent(ev){
+  if(ev.event==='preview'){ showBmi(ev.bmi,ev.category,ev.tdee); return; }
+  if(ev.event==='error'){ toast(ev.message); resetBtn(); return; }
+  if(ev.event==='complete'){
+    document.getElementById('g-status').textContent='complete';
+    logLine('DONE','lt-g',`Complete · N-revisions: ${ev.nutrition_revisions} · M-revisions: ${ev.meal_revisions}`);
+    resetBtn(); return;
+  }
+
+  if(ev.event==='loop_decision'){
+    const isRevise=ev.decision.startsWith('revise');
+    if(ev.loop==='nutrition'){
+      document.getElementById('ls-n').textContent=`${ev.score}/10 · rev ${ev.revision}`;
+      document.getElementById('nt-score').textContent=`score ${ev.score}`;
+      ge('lp1',isRevise?'active':'idle');
+    } else if(ev.loop==='meal'){
+      document.getElementById('ls-m').textContent=`${ev.score}/10 · rev ${ev.revision}`;
+      document.getElementById('ml-score').textContent=ev.score;
+      ge('lp2',isRevise?'active':'idle');
+    }
+    logLine('LOOP','lt-b',`${ev.loop}: score ${ev.score}/10 → ${isRevise?'revise':'proceed'}`);
+    return;
+  }
+
+  const m=AM[ev.agent];
+  if(!m) return;
+
+  if(ev.event==='agent_start'){
+    gn(m.gn, (ev.agent.includes('Critic')?'crit':'active'));
+    if(m.ge_a) ge(m.ge_a,'active');
+    if(ev.agent==='Standard Nutrition Planner') ge('rs','active');
+    if(ev.agent==='Intervention Nutrition Planner') ge('ri','active');
+    tabState(m.tab,'loading');
+    badge(m.tab,'Running…','sb-r');
+    logLine(ev.agent.split(' ')[0],m.lt,'started'+(ev.revision?` rev ${ev.revision+1}`:''));
+    return;
+  }
+
+  if(ev.event==='agent_done'){
+    gn(m.gn,'done');
+    if(m.ge_d) ge(m.ge_d,'done');
+    if(ev.agent==='Standard Nutrition Planner'){ge('rs','done');}
+    if(ev.agent==='Intervention Nutrition Planner'){ge('ri','done');}
+    tabState(m.tab,'done');
+    tick();
+
+    if(ev.agent==='Supervisor'){
+      badge('supervisor','Complete','sb-ok');
+      setContent('supervisor',ev.content);
+      return;
+    }
+
+    if(ev.agent==='Risk Classifier'){
+      badge('risk','Complete','sb-ok');
+      setContent('risk',ev.content);
+      ge('gc','active');
+      if(ev.risk_level==='intervention') ge('ri','active'); else ge('rs','active');
+      logLine('ROUTE','lt-r',`→ ${ev.risk_level?.toUpperCase()} protocol`);
+      return;
+    }
+
+    if(ev.agent==='Standard Nutrition Planner'||ev.agent==='Intervention Nutrition Planner'){
+      const isInt=ev.variant==='intervention';
+      document.getElementById('nutr-proto').innerHTML=
+        `<div class="proto ${isInt?'pi':'ps'}"><i class="bi bi-${isInt?'exclamation-diamond-fill':'check-circle-fill'}"></i>${isInt?'Intervention Protocol':'Standard Protocol'}</div>`;
+      badge('nutr',`Complete (${isInt?'Intervention':'Standard'})`, 'sb-ok');
+      setContent('nutr',ev.content); return;
+    }
+
+    if(ev.agent==='Nutrition Critic'){
+      scoreBar('nutr-score-wrap',ev.score,ev.revision-1);
+      badge('nutr-crit',`${ev.score}/10`,ev.score>=7?'sb-ok':'sb-warn');
+      if(ev.score<7) tabState('nutr-crit','warn');
+      setContent('nutr-crit',ev.content); return;
+    }
+
+    if(ev.agent==='Meal Critic'){
+      scoreBar('meal-score-wrap',ev.score,ev.revision-1);
+      badge('meal-crit',`${ev.score}/10`,ev.score>=7?'sb-ok':'sb-warn');
+      if(ev.score<7) tabState('meal-crit','warn');
+      setContent('meal-crit',ev.content); return;
+    }
+
+    if(ev.agent==='Risk Guard'){
+      const ok=ev.cleared;
+      document.getElementById('clearance-wrap').innerHTML=
+        `<div class="cl-banner ${ok?'cl-ok':'cl-err'}">
+          <i class="bi bi-${ok?'shield-fill-check':'shield-fill-exclamation'}"></i>
+          ${ok?'Clearance Granted — No clinical violations identified.':'Safety Flags Identified — Safety Resolver activating.'}
+        </div>`;
+      badge('guard',ok?'Cleared':'Flags','ok'===ok?'sb-ok':'sb-warn');
+      badge('guard',ok?'Cleared':'Flags',ok?'sb-ok':'sb-warn');
+      document.getElementById('ls-s').textContent=ok?'Cleared':'Flags raised';
+      if(!ok){gn('risk_guard','warn');ge('gr','active');}
+      else   {ge('gc','done');}
+      setContent('guard',ev.content); return;
+    }
+
+    if(ev.agent==='Safety Resolver'){
+      document.getElementById('resolver-section').style.display='block';
+      document.getElementById('content-resolver').textContent=ev.content;
+      document.getElementById('ls-s').textContent='Resolved';
+      ge('rc','active'); ge('gc','active'); return;
+    }
+
+    if(ev.agent==='Wellness Coach'){
+      badge('coach','Complete','sb-ok');
+      const el=document.getElementById('content-coach');
+      el.className='coach-card';
+      const inner=document.createElement('div');
+      inner.className='coach-text';inner.textContent=ev.content;
+      el.innerHTML='';el.appendChild(inner);
+      sw('coach'); return;
+    }
+
+    // default
+    badge(m.tab,'Complete','sb-ok');
+    setContent(m.tab,ev.content);
+    logLine(ev.agent.split(' ')[0],m.lt,'done');
+  }
+}
+
+// ── run ───────────────────────────────────────────────────────────────────
+function run(){
+  const key=document.getElementById('api-key').value.trim();
+  if(!key){toast('OpenAI API key required.');return;}
+  const btn=document.getElementById('run-btn');
+  btn.disabled=true;
+  btn.innerHTML='<div class="sp" style="border-top-color:#040d09;"></div> Running…';
+  reset();
+
+  fetch('/analyze',{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      api_key:key,
+      age:parseInt(document.getElementById('age').value)||32,
+      gender:S.gender,
+      weight_kg:parseFloat(document.getElementById('weight').value)||88,
+      height_cm:parseFloat(document.getElementById('height').value)||175,
+      activity_level:document.getElementById('activity').value,
+      goal:S.goal,
+      dietary_restrictions:document.getElementById('dietary').value,
+      health_conditions:document.getElementById('conditions').value,
+    })
+  }).then(res=>{
+    const reader=res.body.getReader(),dec=new TextDecoder();
+    let buf='';
+    function read(){
+      reader.read().then(({done,value})=>{
+        if(done){resetBtn();return;}
+        buf+=dec.decode(value,{stream:true});
+        const lines=buf.split('\n');buf=lines.pop();
+        lines.forEach(ln=>{
+          if(!ln.startsWith('data: '))return;
+          let ev;try{ev=JSON.parse(ln.slice(6));}catch{return;}
+          handleEvent(ev);
+        });
+        read();
+      });
+    }
+    read();
+  }).catch(e=>{toast('Network error: '+e.message);resetBtn();});
+}
+</script>
+</body>
+</html>
