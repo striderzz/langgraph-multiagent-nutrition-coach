@@ -4,7 +4,7 @@ A multi-agent clinical nutrition system built with LangGraph. Eleven specialist 
 
 
 
-<img width="2560" height="1600" alt="Screenshot (407)" src="https://github.com/user-attachments/assets/bb284f55-1522-4450-a395-9585592ec0f3" />
+<img width="2560" height="1600" alt="Screenshot (405)" src="https://github.com/user-attachments/assets/3b852386-e969-4d1f-951b-4bffd2e68219" />
 
 ---
 
