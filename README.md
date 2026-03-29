@@ -12,12 +12,12 @@ A multi-agent clinical nutrition system built with LangGraph where every agent i
 
 ### Meal Agent running — 7-day plan streaming live
 ![Meal plan](screenshots/meal_plan_running.png)
+<img width="2560" height="1323" alt="Screenshot (411)" src="https://github.com/user-attachments/assets/6f269942-25c2-4539-92ed-5f75038ccd0b" />
 
-<img width="2560" height="1325" alt="Screenshot (412)" src="https://github.com/user-attachments/assets/73bbd054-6d0b-4429-b846-6cdaf1c28389" />
 
 ### Coach Agent — safety audit result and 90-day coaching report
 ![Coach report](screenshots/coach_report.png)
-<img width="2560" height="1323" alt="Screenshot (411)" src="https://github.com/user-attachments/assets/6f269942-25c2-4539-92ed-5f75038ccd0b" />
+<img width="2560" height="1325" alt="Screenshot (412)" src="https://github.com/user-attachments/assets/73bbd054-6d0b-4429-b846-6cdaf1c28389" />
 
 ---
 
